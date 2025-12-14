@@ -66,7 +66,7 @@ constexpr u32 NUM_BREAKPOINT_TYPES = 4;
 constexpr int MACH_O_POWERPC = 18;
 constexpr int MACH_O_POWERPC_750 = 9;
 
-const s64 GDB_UPDATE_CYCLES = 100000;
+const s64 GDB_UPDATE_CYCLES = 0x0100'0000;
 
 static bool s_has_control = false;
 static bool s_just_connected = false;
