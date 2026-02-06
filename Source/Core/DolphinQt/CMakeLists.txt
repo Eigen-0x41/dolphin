@@ -1,8 +1,3 @@
-if(POLICY CMP0084)
-  # Disable trying to search for Qt3/4 if what we actually want is not found
-  cmake_policy(SET CMP0084 NEW)
-endif()
-
 if (MSVC)
   if(_M_ARM_64)
     list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/Externals/Qt/Qt6.5.1/ARM64")
@@ -377,8 +372,8 @@ add_executable(dolphin-emu
   Settings/GeneralPane.h
   Settings/InterfacePane.cpp
   Settings/InterfacePane.h
-	Settings/OnScreenDisplayPane.cpp
-	Settings/OnScreenDisplayPane.h
+  Settings/OnScreenDisplayPane.cpp
+  Settings/OnScreenDisplayPane.h
   Settings/PathPane.cpp
   Settings/PathPane.h
   Settings/USBDevicePicker.cpp
@@ -521,6 +516,13 @@ if(WIN32)
   add_custom_command(TARGET dolphin-emu POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qt.conf.win" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qt.conf"
   )
+
+  if (ENABLE_AUTOUPDATE)
+    # Copy build_info.txt
+    add_custom_command(TARGET dolphin-emu POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/build_info.txt" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/build_info.txt"
+    )
+  endif()
 
   # Delegate to Qt's official deployment binary on Windows to copy over the necessary Qt-specific libraries, etc.
   get_target_property(MOC_EXECUTABLE_LOCATION Qt6::moc IMPORTED_LOCATION)
@@ -669,7 +671,7 @@ if(APPLE)
     endif()
   endif()
 
-  if(NOT SKIP_POSTPROCESS_BUNDLE)
+  if(POSTPROCESS_BUNDLE)
     # Update library references to make the bundle portable
     include(DolphinPostprocessBundle)
     dolphin_postprocess_bundle(dolphin-emu)

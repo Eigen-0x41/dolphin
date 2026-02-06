@@ -123,8 +123,6 @@ add_library(core
   FifoPlayer/FifoPlayer.h
   FifoPlayer/FifoRecorder.cpp
   FifoPlayer/FifoRecorder.h
-  FreeLookConfig.cpp
-  FreeLookConfig.h
   FreeLookManager.cpp
   FreeLookManager.h
   GeckoCode.cpp
@@ -801,7 +799,7 @@ if(UNIX)
   )
 endif()
 
-if(WIN32 OR LINUX)
+if(TARGET cpp-ipc::ipc)
   target_sources(core PRIVATE HW/EXI/BBA/IPC.cpp)
   target_link_libraries(core PRIVATE cpp-ipc::ipc)
 endif()

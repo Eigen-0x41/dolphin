@@ -5,8 +5,8 @@
 
 #include <algorithm>
 #include <array>
-#include <cmath>
 #include <cstring>
+#include <fstream>
 #include <memory>
 #include <numeric>
 #include <optional>
@@ -17,7 +17,6 @@
 
 #include <fmt/ranges.h>
 
-#include "Common/Align.h"
 #include "Common/CommonPaths.h"
 #include "Common/CommonTypes.h"
 #include "Common/Config/Config.h"
@@ -240,7 +239,7 @@ std::unique_ptr<BootParameters> BootParameters::GenerateFromFile(std::vector<std
        ".elf"}};
   if (disc_image_extensions.contains(extension))
   {
-    std::unique_ptr<DiscIO::VolumeDisc> disc = DiscIO::CreateDisc(path);
+    std::unique_ptr<DiscIO::VolumeDisc> disc = DiscIO::CreateDiscForCore(path);
     if (disc)
     {
       return std::make_unique<BootParameters>(Disc{std::move(path), std::move(disc), paths},
@@ -469,7 +468,7 @@ static void SetDefaultDisc(DVD::DVDInterface& dvd_interface)
 {
   const std::string default_iso = Config::Get(Config::MAIN_DEFAULT_ISO);
   if (!default_iso.empty())
-    SetDisc(dvd_interface, DiscIO::CreateDisc(default_iso));
+    SetDisc(dvd_interface, DiscIO::CreateDiscForCore(default_iso));
 }
 
 static void CopyDefaultExceptionHandlers(Core::System& system)
@@ -629,7 +628,7 @@ bool CBoot::BootUp(Core::System& system, const Core::CPUThreadGuard& guard,
       if (ipl.disc)
       {
         NOTICE_LOG_FMT(BOOT, "Inserting disc: {}", ipl.disc->path);
-        SetDisc(system.GetDVDInterface(), DiscIO::CreateDisc(ipl.disc->path),
+        SetDisc(system.GetDVDInterface(), DiscIO::CreateDiscForCore(ipl.disc->path),
                 ipl.disc->auto_disc_change_paths);
       }
       else
@@ -703,13 +702,13 @@ void UpdateStateFlags(std::function<void(StateFlags*)> update_function)
 
   StateFlags state{};
   if (file->GetStatus()->size == sizeof(StateFlags))
-    file->Read(&state, 1);
+    (void)file->Read(&state, 1);
 
   update_function(&state);
   state.UpdateChecksum();
 
-  file->Seek(0, IOS::HLE::FS::SeekMode::Set);
-  file->Write(&state, 1);
+  (void)file->Seek(0, IOS::HLE::FS::SeekMode::Set);
+  (void)file->Write(&state, 1);
 }
 
 void CreateSystemMenuTitleDirs()
